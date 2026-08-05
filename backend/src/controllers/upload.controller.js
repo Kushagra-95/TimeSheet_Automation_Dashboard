@@ -1,5 +1,6 @@
 const uploadService = require("../services/upload.service");
-
+const fs = require("fs");
+const crypto = require("crypto");
 exports.uploadFile = async (req, res) => {
   try {
     if (!req.file) {
