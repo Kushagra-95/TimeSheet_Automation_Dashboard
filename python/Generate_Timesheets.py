@@ -3,7 +3,10 @@ import sys
 import pandas as pd
 from openpyxl.styles import Border, Side
 from openpyxl.utils import get_column_letter
-
+import zipfile
+import shutil
+import tempfile
+import xml.etree.ElementTree as ET
 # -----------------------------
 # Read paths from command line
 # -----------------------------
@@ -18,6 +21,73 @@ if not excel_files:
 
 input_file = excel_files[0]
 
+def repair_excel(input_file):
+    """
+    Repairs SAP generated xlsx files that contain invalid
+    empty <fill/> elements inside styles.xml.
+    Returns the repaired workbook path.
+    """
+
+    temp_dir = Path(tempfile.mkdtemp())
+
+    with zipfile.ZipFile(input_file, "r") as z:
+        z.extractall(temp_dir)
+
+    styles = temp_dir / "xl" / "styles.xml"
+
+    if styles.exists():
+
+        ns = {
+            "x": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+        }
+
+        tree = ET.parse(styles)
+        root = tree.getroot()
+
+        fills = root.find("x:fills", ns)
+
+        if fills is not None:
+
+            changed = False
+
+            for fill in fills.findall("x:fill", ns):
+
+                if len(fill) == 0:
+
+                    pattern = ET.SubElement(
+                        fill,
+                        "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}patternFill"
+                    )
+
+                    pattern.set("patternType", "none")
+
+                    changed = True
+
+            if changed:
+                tree.write(
+                    styles,
+                    encoding="utf-8",
+                    xml_declaration=True
+                )
+
+    repaired = temp_dir / "repaired.xlsx"
+
+    with zipfile.ZipFile(
+        repaired,
+        "w",
+        zipfile.ZIP_DEFLATED
+    ) as new_zip:
+
+        for file in temp_dir.rglob("*"):
+
+            if file.is_file() and file != repaired:
+
+                new_zip.write(
+                    file,
+                    file.relative_to(temp_dir)
+                )
+
+    return repaired
 
 def format_name(email):
     try:
@@ -31,12 +101,27 @@ def format_name(email):
 
 
 # Read second sheet
-df = pd.read_excel(
-    input_file,
-    sheet_name=1,
-    engine="openpyxl",
-    dtype=str
-)
+try:
+
+    df = pd.read_excel(
+        input_file,
+        sheet_name=1,
+        engine="openpyxl",
+        dtype=str
+    )
+
+except Exception as e:
+
+    print("Repairing workbook...")
+
+    repaired = repair_excel(input_file)
+
+    df = pd.read_excel(
+        repaired,
+        sheet_name=1,
+        engine="openpyxl",
+        dtype=str
+    )
 
 # Select required columns
 selected_columns = df.iloc[:, [8, 10, 13, 20]].copy()
