@@ -12,7 +12,8 @@ import xml.etree.ElementTree as ET
 # -----------------------------
 input_dir = Path(sys.argv[1])
 output_dir = Path(sys.argv[2])
-
+all_timesheets_folder = output_dir / "All Timesheets"
+all_timesheets_folder.mkdir(parents=True, exist_ok=True)
 # Find uploaded Excel file
 excel_files = list(input_dir.glob("*.xlsx"))
 
@@ -157,39 +158,41 @@ for name in selected_columns["Name"].unique():
     safe_name="".join(c for c in name if c.isalnum() or c == " ").strip()
     file_name=f"{month_year} Timesheet {safe_name}.xlsx"
     output_path=output_dir/file_name
+    folder_output_path = all_timesheets_folder / file_name
+    for save_path in [output_path, folder_output_path]:
 
-    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+        with pd.ExcelWriter(save_path, engine="openpyxl") as writer:
 
-        filtered_df.to_excel(
-            writer,
-            index=False,
-            sheet_name="Sheet1"
-        )
+            filtered_df.to_excel(
+                writer,
+                index=False,
+                sheet_name="Sheet1"
+            )
 
-        worksheet = writer.sheets["Sheet1"]
+            worksheet = writer.sheets["Sheet1"]
 
-        thin_border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin")
-        )
+            thin_border = Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin")
+            )
 
-        for col_idx, column in enumerate(filtered_df.columns, 1):
+            for col_idx, column in enumerate(filtered_df.columns, 1):
 
-            col_letter = get_column_letter(col_idx)
+                col_letter = get_column_letter(col_idx)
 
-            max_length = max(
-                filtered_df[column].astype(str).map(len).max(),
-                len(column)
-            ) + 2
+                max_length = max(
+                    filtered_df[column].astype(str).map(len).max(),
+                    len(column)
+                ) + 2
 
-            worksheet.column_dimensions[col_letter].width = max_length
+                worksheet.column_dimensions[col_letter].width = max_length
 
-            for row in range(2, len(filtered_df) + 2):
-                worksheet[f"{col_letter}{row}"].border = thin_border
+                for row in range(2, len(filtered_df) + 2):
+                    worksheet[f"{col_letter}{row}"].border = thin_border
 
-        for col_idx in range(1, len(filtered_df.columns) + 1):
-            worksheet[f"{get_column_letter(col_idx)}1"].border = thin_border
+            for col_idx in range(1, len(filtered_df.columns) + 1):
+                worksheet[f"{get_column_letter(col_idx)}1"].border = thin_border
 
 print(f"{len(selected_columns['Name'].unique())} individual timesheets generated successfully.")
