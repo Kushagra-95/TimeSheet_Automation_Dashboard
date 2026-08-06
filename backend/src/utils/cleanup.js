@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 
-function scheduleCleanup(workspacePath, delay = 1 * 60 * 1000) {
+function scheduleCleanup(workspacePath, delay = 10 * 60 * 1000) {
   setTimeout(async () => {
     try {
       await fs.rm(workspacePath, {
