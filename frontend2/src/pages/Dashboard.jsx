@@ -153,13 +153,20 @@ const data = await runWorkflow(uploadResult.jobId);
                 />
 
             </div>
-            
-            <ProgressSection progress={progress} />
+           <div className="trio">
+            <div className="upload-panel">
+
             <FileUpload
                 file={file}
                 setFile={setFile}
             />
-            <div className="action">
+            </div>
+            <div className="progress-panel">
+
+            <ProgressSection progress={progress} />
+            </div>
+</div>
+            <div className="action workflow-action">
 
                 <button
 
@@ -174,7 +181,6 @@ const data = await runWorkflow(uploadResult.jobId);
                 </button>
 
             </div>
-
             <Console logs={logs} />
             <div className="dashboard-grid">
 

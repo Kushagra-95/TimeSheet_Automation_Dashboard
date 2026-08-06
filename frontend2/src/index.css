@@ -336,7 +336,7 @@ body{
     color:#64748B;
 
     font-size:24px;
-
+    
 }
 .status-grid{
 
@@ -346,7 +346,7 @@ body{
 
     gap:20px;
 
-    margin-bottom:30px;
+    margin-bottom:20px;
 
 }
 
@@ -423,9 +423,16 @@ body{
     border-radius:18px;
 
     padding:25px;
-
+    margin-top: 25px;
     margin-bottom:30px;
+    gap:30px;
+    height:100%;
 
+    display:flex;
+
+    flex-direction:column;
+    justify-content:center;
+    
 }
 
 .progress-header{
@@ -505,7 +512,7 @@ body{
     border-radius:18px;
 
     overflow:hidden;
-
+    margin-top:10px;
 }
 
 .console-header{
@@ -592,7 +599,7 @@ body{
 .timeline-card,
 .output-card,
 .history-card{
-
+    margin-top:20px;
     background:var(--surface);
 
     border:1px solid var(--border);
@@ -943,4 +950,67 @@ body{
 
     }
 
+}
+.trio{
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:50px;
+}
+
+.trio > div{
+    display:flex;
+    min-width:0;
+    align-items:stretch;
+}
+
+.upload-panel,
+.progress-panel{
+        flex:1 1 0;
+}
+
+.upload-panel > *,
+.progress-panel > *{
+    width:100%;
+    height:100%;
+}
+
+.workflow-action{
+    margin-bottom:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+        margin-top:18px;
+}
+
+.workflow-action .run-btn{
+    width:auto;
+    min-height:auto;
+    padding:12px 20px;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+@media (max-width: 768px) {
+  .trio > div{
+    width:100%;
+  }
+
+    .trio{
+        margin-bottom:22px;
+    }
+
+    .workflow-action{
+        margin-top:14px;
+    }
+
+    .workflow-action .run-btn{
+    width:100%;
+    max-width:240px;
+    min-height:56px;
+  }
 }
