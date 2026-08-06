@@ -113,7 +113,7 @@ try:
 
 except Exception as e:
 
-    print("Repairing workbook...")
+    # print("Repairing workbook...")
 
     repaired = repair_excel(input_file)
 

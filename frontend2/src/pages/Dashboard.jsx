@@ -126,7 +126,7 @@ const data = await runWorkflow(uploadResult.jobId);
 
                     title="Scripts"
 
-                    value="2"
+                    value="1"
 
                     icon={<FiCpu />}
 
