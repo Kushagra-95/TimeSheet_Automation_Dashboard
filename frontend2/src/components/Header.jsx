@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from "../assets/nagarro-logo-png_seeklogo-572171.png";
+import logo from "../assets/nagarro_black.png";
 
 function Header() {
   const [time, setTime] = useState(new Date());
