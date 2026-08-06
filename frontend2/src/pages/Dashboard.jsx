@@ -153,7 +153,7 @@ const data = await runWorkflow(uploadResult.jobId);
                 />
 
             </div>
-
+            
             <ProgressSection progress={progress} />
             <FileUpload
                 file={file}
@@ -187,10 +187,7 @@ const data = await runWorkflow(uploadResult.jobId);
     files={files}
     jobId={jobId}
 />
-            <HistoryCard
-                status={status}
-                duration={time}
-            />
+           {/* <HistoryCard/> */}
 
         </div>
 

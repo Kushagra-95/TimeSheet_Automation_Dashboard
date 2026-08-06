@@ -603,6 +603,26 @@ body{
 
 }
 
+.output-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.generated-files-list{
+
+    margin-top:12px;
+
+    max-height:240px;
+
+    overflow-y:auto;
+
+    padding-right:6px;
+
+}
+
 .timeline-item{
 
     display:flex;

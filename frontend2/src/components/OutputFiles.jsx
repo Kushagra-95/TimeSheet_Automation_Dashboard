@@ -56,28 +56,30 @@ function OutputFiles({ files, jobId }) {
     <div className="output-card">
       <h3>Generated Files</h3>
 
-      {!files || files.length === 0 ? (
-        <p className="empty">No files generated</p>
-      ) : (
-        files.map((item) => (
-          <div className="file-item" key={item.name}>
-            {item.type === "file" ? <FiFileText /> : <FiFolder />}
+      <div className="generated-files-list">
+        {!files || files.length === 0 ? (
+          <p className="empty">No files generated</p>
+        ) : (
+          files.map((item) => (
+            <div className="file-item" key={item.name}>
+              {item.type === "file" ? <FiFileText /> : <FiFolder />}
 
-            <span>{item.name}</span>
+              <span>{item.name}</span>
 
-            <button
-              className="download-btn"
-              onClick={() =>
-                item.type === "file"
-                  ? handleFileDownload(item.name)
-                  : handleFolderDownload(item.name)
-              }
-            >
-              <FiDownload />
-            </button>
-          </div>
-        ))
-      )}
+              <button
+                className="download-btn"
+                onClick={() =>
+                  item.type === "file"
+                    ? handleFileDownload(item.name)
+                    : handleFolderDownload(item.name)
+                }
+              >
+                <FiDownload />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
