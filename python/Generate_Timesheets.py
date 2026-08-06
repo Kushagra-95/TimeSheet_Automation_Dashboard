@@ -196,3 +196,4 @@ for name in selected_columns["Name"].unique():
                 worksheet[f"{get_column_letter(col_idx)}1"].border = thin_border
 
 print(f"{len(selected_columns['Name'].unique())} individual timesheets generated successfully.")
+print("Please download Your files within 10 min")
