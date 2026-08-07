@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import logo from "../assets/nagarro_black.png";
+import { FiUser } from "react-icons/fi";
 
 function Header() {
   const [time, setTime] = useState(new Date());
@@ -13,23 +14,25 @@ function Header() {
   }, []);
 
   return (
-    <div className="header">
-      <div className="header-brand">
-        <img src={logo} className="brand-logo" alt="Nagarro logo" />
+    <header className="top-header">
+      <div className="top-left">
+        <img src={logo} alt="Nagarro" className="top-logo" />
       </div>
 
-      <div className="header-title">
-        <h1>Timesheet Automation Dashboard</h1>
-        <p>Workflow tracker and output monitor</p>
+      <div className="top-center">
+        <h2>Timesheet Automation Dashboard</h2>
+        <p>Workflow Tracker & Output Monitor</p>
       </div>
 
-      <div className="header-right">
-        <div className="clock">
-          {time.toLocaleDateString()} <br />
-          {time.toLocaleTimeString()}
+      <div className="top-right">
+        <div className="time-box">
+          <span>{time.toLocaleDateString()}</span>
+          <span>{time.toLocaleTimeString()}</span>
         </div>
+
+        
       </div>
-    </div>
+    </header>
   );
 }
 

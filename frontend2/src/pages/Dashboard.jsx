@@ -4,9 +4,7 @@ import Header from "../components/Header";
 import StatusCard from "../components/StatusCard";
 import ProgressSection from "../components/ProgressSection";
 import Console from "../components/Console";
-import WorkflowTimeline from "../components/WorkflowTimeline";
 import OutputFiles from "../components/OutputFiles";
-import HistoryCard from "../components/HistoryCard";
 import FileUpload from "../components/FileUpload";
 
 import {
@@ -28,10 +26,6 @@ function Dashboard() {
 
     const [time, setTime] = useState("--");
 
-    const [currentStep, setCurrentStep] = useState(-1);
-
-    const [completed, setCompleted] = useState([false, false]);
-
     const [files, setFiles] = useState([]);
 
     const [file, setFile] = useState(null);
@@ -48,8 +42,6 @@ function Dashboard() {
 
   setLogs("");
 
-  setCompleted([false, false]);
-
   setFiles([]);
 
   const start = Date.now();
@@ -65,11 +57,7 @@ setJobId(uploadResult.jobId);
 const data = await runWorkflow(uploadResult.jobId);
     let output = "";
 
-    const done = [false, false];
-
     for (let i = 0; i < data.results.length; i++) {
-
-      setCurrentStep(i);
 
       await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -77,16 +65,10 @@ const data = await runWorkflow(uploadResult.jobId);
 
       output += `${data.results[i].output}\n\n`;
 
-      done[i] = true;
-
-      setCompleted([...done]);
-
       setLogs(output);
 
       setProgress(((i + 1) / data.results.length) * 100);
     }
-
-    setCurrentStep(-1);
 
     setStatus("Completed");
 
@@ -109,7 +91,7 @@ const data = await runWorkflow(uploadResult.jobId);
         <>
 
             <Header />
-
+        <div className="dashboard-container">
             <div className="status-grid">
 
                 <StatusCard
@@ -165,7 +147,7 @@ const data = await runWorkflow(uploadResult.jobId);
 
             <ProgressSection progress={progress} />
             </div>
-</div>
+            </div>
             <div className="action workflow-action">
 
                 <button
@@ -181,22 +163,15 @@ const data = await runWorkflow(uploadResult.jobId);
                 </button>
 
             </div>
-            <Console logs={logs} />
-            <div className="dashboard-grid">
-
-            <WorkflowTimeline
-                currentStep={currentStep}
-                completed={completed}
-            />
-
-            <OutputFiles
-    files={files}
-    jobId={jobId}
-/>
-           {/* <HistoryCard/> */}
-
+            <div className="console-output-grid">
+                <div className="console-panel">
+                    <Console logs={logs} />
+                </div>
+                <div className="output-panel">
+                    <OutputFiles files={files} jobId={jobId} />
+                </div>
+            </div>
         </div>
-
         </>
 
     );
