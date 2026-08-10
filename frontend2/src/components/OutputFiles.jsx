@@ -54,7 +54,7 @@ function OutputFiles({ files, jobId }) {
 
   return (
     <div className="output-card">
-      <h3>Generated Files</h3>
+      <h4>Generated Files</h4>
 
       <div className="generated-files-list">
         {!files || files.length === 0 ? (

@@ -12,9 +12,7 @@ function FileUpload({ file, setFile }) {
 
         <div>
           <p className="upload-title">Click to upload Excel file</p>
-          <span className="upload-subtitle">
-            Supported formats: .xlsx, .xls
-          </span>
+          
         </div>
 
         <input
