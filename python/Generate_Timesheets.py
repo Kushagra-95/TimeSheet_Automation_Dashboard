@@ -565,7 +565,7 @@ def create_project_sheet(
         ws.cell(
             row=row,
             column=5
-        ).value = f"=C{row}-D{row}"
+        ).value = working_days - leaves
 
         # ----------------------------------------------------
         # Total Hours
@@ -577,15 +577,26 @@ def create_project_sheet(
             6 + len(dates) - 1
         )
 
+        # ws.cell(
+        #     row=row,
+        #     column=total_col
+        # ).value = (
+        #     f"=SUM("
+        #     f"{first_day_column}{row}:"
+        #     f"{last_day_column}{row}"
+        #     f")"
+        # )
+        total_hours = sum(hours_dict.get(
+        (
+            current_project,
+            user,
+            date.date()
+        ),0) for date in dates )
+
         ws.cell(
             row=row,
             column=total_col
-        ).value = (
-            f"=SUM("
-            f"{first_day_column}{row}:"
-            f"{last_day_column}{row}"
-            f")"
-        )
+        ).value = total_hours
 
     # --------------------------------------------------------
     # Total row
@@ -636,15 +647,36 @@ def create_project_sheet(
 
         column_letter = get_column_letter(col)
 
-        ws.cell(
-            row=total_row,
-            column=col
-        ).value = (
-            f"=SUM("
-            f"{column_letter}{start_row}:"
-            f"{column_letter}{last_user_row}"
-            f")"
-        )
+        # ws.cell(
+        #     row=total_row,
+        #     column=col
+        # ).value = (
+        #     f"=SUM("
+        #     f"{column_letter}{start_row}:"
+        #     f"{column_letter}{last_user_row}"
+        #     f")"
+        # )
+        for col in range(3, total_col + 1):
+
+            total_value = 0
+
+            for row in range(
+                start_row,
+                last_user_row + 1
+            ):
+
+                value = ws.cell(
+                    row=row,
+                    column=col
+                ).value
+
+                if isinstance(value, (int, float)):
+                    total_value += value
+
+            ws.cell(
+                row=total_row,
+                column=col
+            ).value = total_value
 
     # --------------------------------------------------------
     # Total Hours
@@ -671,18 +703,36 @@ def create_project_sheet(
         total_col
     )
 
+    # ws.cell(
+    #     row=total_hours_row,
+    #     column=3
+    # ).value = (
+    #     f"={total_column_letter}{total_row}"
+    # )
+    total_hours = sum(
+        ws.cell(
+            row=row,
+            column=total_col
+        ).value or 0
+        for row in range(
+            start_row,
+            last_user_row + 1
+        )
+    )
     ws.cell(
         row=total_hours_row,
         column=3
-    ).value = (
-        f"={total_column_letter}{total_row}"
-    )
-
+    ).value = total_hours
+    
     ws.cell(
         row=total_hours_row,
         column=3
     ).border = thin_border
 
+    ws.cell(
+        row=total_hours_row,
+        column=3
+    ).alignment = center_alignment
     # --------------------------------------------------------
     # Formatting
     # --------------------------------------------------------
