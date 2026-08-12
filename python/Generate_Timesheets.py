@@ -1,7 +1,8 @@
 from pathlib import Path
 import sys
 import pandas as pd
-from openpyxl.styles import Border, Side
+from openpyxl.styles import Border, Side, Font, Alignment
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 import zipfile
 import shutil
@@ -194,6 +195,650 @@ for name in selected_columns["Name"].unique():
 
             for col_idx in range(1, len(filtered_df.columns) + 1):
                 worksheet[f"{get_column_letter(col_idx)}1"].border = thin_border
+# ============================================================
+# CREATE FGSS TIMESHEET XLSX
+#
+# Workbook contains:
+#   1. All Projects
+#   2. One separate sheet for every Project
+#
+# Project is picked directly from the "Project" column
+# of Timesheet Logs Master.
+# ============================================================
 
-print(f"{len(selected_columns['Name'].unique())} individual timesheets generated successfully.")
-print("Please download Your files within 10 min")
+
+# ------------------------------------------------------------
+# Get Project column from Timesheet Logs Master
+# ------------------------------------------------------------
+
+project_column = None
+
+for column in df.columns:
+
+    if str(column).strip().lower() == "project":
+        project_column = column
+        break
+
+if project_column is None:
+    raise ValueError(
+        "Project column was not found in Timesheet Logs Master."
+    )
+
+
+# ------------------------------------------------------------
+# Add Project to selected data
+# ------------------------------------------------------------
+
+selected_columns["Project"] = (
+    df.loc[
+        selected_columns.index,
+        project_column
+    ]
+    .astype(str)
+    .str.strip()
+)
+
+
+# ------------------------------------------------------------
+# Clean data
+# ------------------------------------------------------------
+
+selected_columns["Timesheet Date"] = pd.to_datetime(
+    selected_columns["Timesheet Date"],
+    errors="coerce"
+)
+
+selected_columns["Recorded Hours"] = pd.to_numeric(
+    selected_columns["Recorded Hours"],
+    errors="coerce"
+).fillna(0)
+
+selected_columns = selected_columns[
+    selected_columns["Timesheet Date"].notna()
+].copy()
+
+
+# Remove empty projects
+
+selected_columns = selected_columns[
+    selected_columns["Project"].notna() &
+    selected_columns["Project"].ne("") &
+    selected_columns["Project"].ne("nan")
+].copy()
+
+
+# ------------------------------------------------------------
+# Determine month
+# ------------------------------------------------------------
+
+month_start = (
+    selected_columns["Timesheet Date"]
+    .min()
+    .replace(day=1)
+)
+
+month_end = (
+    month_start + pd.offsets.MonthEnd(1)
+)
+
+dates = pd.date_range(
+    start=month_start,
+    end=month_end,
+    freq="D"
+)
+
+month_year = month_start.strftime(
+    "%B %Y"
+)
+
+
+# ------------------------------------------------------------
+# Create workbook
+# ------------------------------------------------------------
+
+fgss_wb = Workbook()
+
+
+# Remove default sheet
+
+default_sheet = fgss_wb.active
+
+fgss_wb.remove(default_sheet)
+
+
+# ------------------------------------------------------------
+# Styles
+# ------------------------------------------------------------
+
+thin_side = Side(style="thin")
+
+thin_border = Border(
+    left=thin_side,
+    right=thin_side,
+    top=thin_side,
+    bottom=thin_side
+)
+
+bold_font = Font(
+    bold=True
+)
+
+center_alignment = Alignment(
+    horizontal="center",
+    vertical="center"
+)
+
+
+# ============================================================
+# FUNCTION TO CREATE A PROJECT TIMESHEET SHEET
+# ============================================================
+
+def create_project_sheet(
+    workbook,
+    sheet_name,
+    project_data
+):
+
+    # --------------------------------------------------------
+    # Create sheet
+    # --------------------------------------------------------
+
+    ws = workbook.create_sheet(
+        title=sheet_name
+    )
+
+    # --------------------------------------------------------
+    # Month / Year
+    # --------------------------------------------------------
+
+    ws["B2"] = month_year
+
+    ws["B2"].font = bold_font
+    ws["B2"].alignment = center_alignment
+    ws["B2"].border = thin_border
+
+    # --------------------------------------------------------
+    # Headers
+    # --------------------------------------------------------
+
+    headers = [
+        "Project",
+        "Resource",
+        "Total Working Days",
+        "Leaves",
+        "Working Days After Leavs"
+    ]
+
+    for col, header in enumerate(headers, 1):
+
+        cell = ws.cell(
+            row=3,
+            column=col
+        )
+
+        cell.value = header
+        cell.font = bold_font
+        cell.border = thin_border
+        cell.alignment = center_alignment
+
+    # --------------------------------------------------------
+    # Day headers
+    # --------------------------------------------------------
+
+    for i, date in enumerate(dates):
+
+        col = 6 + i
+
+        cell = ws.cell(
+            row=3,
+            column=col
+        )
+
+        cell.value = date.strftime("%a")
+        cell.font = bold_font
+        cell.border = thin_border
+        cell.alignment = center_alignment
+
+    # --------------------------------------------------------
+    # Total column
+    # --------------------------------------------------------
+
+    total_col = 6 + len(dates)
+
+    cell = ws.cell(
+        row=3,
+        column=total_col
+    )
+
+    cell.value = "Total"
+    cell.font = bold_font
+    cell.border = thin_border
+    cell.alignment = center_alignment
+
+    # --------------------------------------------------------
+    # Create lookup
+    #
+    # IMPORTANT:
+    # Project + Name + Date
+    # --------------------------------------------------------
+
+    hours_lookup = (
+        project_data
+        .groupby(
+            [
+                "Project",
+                "Name",
+                "Timesheet Date"
+            ],
+            as_index=False
+        )["Recorded Hours"]
+        .sum()
+    )
+
+    hours_dict = {}
+
+    for _, record in hours_lookup.iterrows():
+
+        key = (
+            record["Project"],
+            record["Name"],
+            record["Timesheet Date"].date()
+        )
+
+        hours_dict[key] = record["Recorded Hours"]
+
+    # --------------------------------------------------------
+    # IMPORTANT:
+    # Create unique Project + User combinations
+    #
+    # This fixes the All Projects problem.
+    # --------------------------------------------------------
+
+    user_projects = (
+        project_data[
+            ["Project", "Name"]
+        ]
+        .drop_duplicates()
+        .sort_values(
+            ["Project", "Name"]
+        )
+    )
+
+    # --------------------------------------------------------
+    # Create user rows
+    # --------------------------------------------------------
+
+    start_row = 4
+
+    for index, user_project in enumerate(
+        user_projects.itertuples(index=False),
+        start=0
+    ):
+
+        row = start_row + index
+
+        current_project = user_project.Project
+        user = user_project.Name
+
+        # ----------------------------------------------------
+        # Project
+        # ----------------------------------------------------
+
+        ws.cell(
+            row=row,
+            column=1
+        ).value = current_project
+
+        # ----------------------------------------------------
+        # Resource
+        # ----------------------------------------------------
+
+        ws.cell(
+            row=row,
+            column=2
+        ).value = user
+
+        # ----------------------------------------------------
+        # Total Working Days
+        # ----------------------------------------------------
+
+        working_days = sum(
+            1
+            for date in dates
+            if date.weekday() < 5
+        )
+
+        ws.cell(
+            row=row,
+            column=3
+        ).value = working_days
+
+        # ----------------------------------------------------
+        # Daily hours
+        # ----------------------------------------------------
+
+        leaves = 0
+
+        for i, date in enumerate(dates):
+
+            col = 6 + i
+
+            hours = hours_dict.get(
+                (
+                    current_project,
+                    user,
+                    date.date()
+                ),
+                0
+            )
+
+            # Weekend
+            if date.weekday() >= 5:
+                hours = 0
+
+            # Weekday without hours
+            elif hours == 0:
+                leaves += 1
+
+            cell = ws.cell(
+                row=row,
+                column=col
+            )
+
+            cell.value = hours
+            cell.border = thin_border
+            cell.alignment = center_alignment
+
+        # ----------------------------------------------------
+        # Leaves
+        # ----------------------------------------------------
+
+        ws.cell(
+            row=row,
+            column=4
+        ).value = leaves
+
+        # ----------------------------------------------------
+        # Working Days After Leaves
+        # ----------------------------------------------------
+
+        ws.cell(
+            row=row,
+            column=5
+        ).value = f"=C{row}-D{row}"
+
+        # ----------------------------------------------------
+        # Total Hours
+        # ----------------------------------------------------
+
+        first_day_column = get_column_letter(6)
+
+        last_day_column = get_column_letter(
+            6 + len(dates) - 1
+        )
+
+        ws.cell(
+            row=row,
+            column=total_col
+        ).value = (
+            f"=SUM("
+            f"{first_day_column}{row}:"
+            f"{last_day_column}{row}"
+            f")"
+        )
+
+    # --------------------------------------------------------
+    # Total row
+    # --------------------------------------------------------
+
+    last_user_row = (
+        start_row +
+        len(user_projects) -
+        1
+    )
+
+    total_row = last_user_row + 1
+
+    ws.merge_cells(
+        start_row=total_row,
+        start_column=1,
+        end_row=total_row,
+        end_column=2
+    )
+
+    ws.cell(
+        row=total_row,
+        column=1
+    ).value = "Total:"
+
+    ws.cell(
+        row=total_row,
+        column=1
+    ).font = bold_font
+
+    for col in range(
+        1,
+        total_col + 1
+    ):
+
+        cell = ws.cell(
+            row=total_row,
+            column=col
+        )
+
+        cell.border = thin_border
+        cell.alignment = center_alignment
+
+    for col in range(
+        3,
+        total_col + 1
+    ):
+
+        column_letter = get_column_letter(col)
+
+        ws.cell(
+            row=total_row,
+            column=col
+        ).value = (
+            f"=SUM("
+            f"{column_letter}{start_row}:"
+            f"{column_letter}{last_user_row}"
+            f")"
+        )
+
+    # --------------------------------------------------------
+    # Total Hours
+    # --------------------------------------------------------
+
+    total_hours_row = total_row + 2
+
+    ws.cell(
+        row=total_hours_row,
+        column=2
+    ).value = "Total Hours"
+
+    ws.cell(
+        row=total_hours_row,
+        column=2
+    ).font = bold_font
+
+    ws.cell(
+        row=total_hours_row,
+        column=2
+    ).border = thin_border
+
+    total_column_letter = get_column_letter(
+        total_col
+    )
+
+    ws.cell(
+        row=total_hours_row,
+        column=3
+    ).value = (
+        f"={total_column_letter}{total_row}"
+    )
+
+    ws.cell(
+        row=total_hours_row,
+        column=3
+    ).border = thin_border
+
+    # --------------------------------------------------------
+    # Formatting
+    # --------------------------------------------------------
+
+    for row in ws.iter_rows(
+        min_row=3,
+        max_row=total_hours_row,
+        min_col=1,
+        max_col=total_col
+    ):
+
+        for cell in row:
+
+            cell.border = thin_border
+            cell.alignment = center_alignment
+
+    # --------------------------------------------------------
+    # Column widths
+    # --------------------------------------------------------
+
+    ws.column_dimensions["A"].width = 28
+    ws.column_dimensions["B"].width = 25
+    ws.column_dimensions["C"].width = 20
+    ws.column_dimensions["D"].width = 12
+    ws.column_dimensions["E"].width = 25
+
+    for col in range(
+        6,
+        total_col
+    ):
+
+        ws.column_dimensions[
+            get_column_letter(col)
+        ].width = 6
+
+    ws.column_dimensions[
+        get_column_letter(total_col)
+    ].width = 12
+
+    # --------------------------------------------------------
+    # Freeze panes
+    # --------------------------------------------------------
+
+    ws.freeze_panes = "F4"
+
+
+# ============================================================
+# 1. ALL PROJECTS SHEET
+# ============================================================
+
+create_project_sheet(
+    fgss_wb,
+    "All Projects",
+    selected_columns
+)
+
+
+# ============================================================
+# 2. SEPARATE SHEET FOR EACH PROJECT
+# ============================================================
+
+projects = sorted(
+    selected_columns[
+        "Project"
+    ]
+    .dropna()
+    .unique()
+)
+
+
+for project in projects:
+
+    project_data = selected_columns[
+        selected_columns[
+            "Project"
+        ] == project
+    ].copy()
+
+
+    # --------------------------------------------------------
+    # Excel sheet name restrictions
+    # --------------------------------------------------------
+
+    safe_sheet_name = str(project)
+
+    for character in [
+        "\\",
+        "/",
+        "*",
+        "?",
+        ":",
+        "[",
+        "]"
+    ]:
+
+        safe_sheet_name = (
+            safe_sheet_name
+            .replace(character, "_")
+        )
+
+
+    safe_sheet_name = safe_sheet_name[
+        :31
+    ]
+
+
+    # Avoid duplicate sheet names
+
+    if safe_sheet_name in fgss_wb.sheetnames:
+
+        counter = 2
+
+        original_name = safe_sheet_name
+
+        while safe_sheet_name in fgss_wb.sheetnames:
+
+            suffix = f"_{counter}"
+
+            safe_sheet_name = (
+                original_name[
+                    :31 - len(suffix)
+                ]
+                + suffix
+            )
+
+            counter += 1
+
+
+    create_project_sheet(
+        fgss_wb,
+        safe_sheet_name,
+        project_data
+    )
+
+
+# ============================================================
+# SAVE FINAL FGSS XLSX
+# ============================================================
+
+fgss_file_name = (
+    f"{month_year} Timesheet.xlsx"
+)
+
+fgss_output_path = (
+    output_dir /
+    fgss_file_name
+)
+
+
+fgss_wb.save(
+    fgss_output_path
+)
+
+
+print()
+print("Created All Timesheet Zip")
+print("Created timesheet for particular candidates")
+print(f"Created {fgss_file_name}")
+print("Please download all the files or zip within 10 mins")

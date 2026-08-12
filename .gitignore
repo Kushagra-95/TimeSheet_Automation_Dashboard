@@ -1,4 +1,5 @@
 backend/node_modules/.package-lock.json
+backend/temp
 backend/node_modules/.bin/crc32
 backend/node_modules/.bin/crc32.cmd
 backend/node_modules/.bin/crc32.ps1
