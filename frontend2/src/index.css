@@ -1,295 +1,746 @@
-/* --------------------------------------------------------------
-   1️⃣  DESIGN TOKENS
--------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* ==============================================================
+   DESIGN TOKENS
+============================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
 
 :root {
-  --accent:#0ea5a5;
-  --accent-soft:#d7f4f3;
-  --accent-bg:#ecfeff;
-  --accent-border:#99f6e4;
-  --text-main:#0f172a;
-  --text-muted:#64748b;
-  --surface:#ffffff;
-  --surface-soft:#f8fbff;
-  --border:#dce6f1;
-  --shadow:0 12px 30px rgba(15,23,42,.08);
+  /* Brand Palette */
+  --accent:         #0ea5e9;
+  --accent-light:   #0284c7;
+  --accent-dark:    #0369a1;
+  --accent-glow:    rgba(14,165,233,.2);
+  --accent-bg:      rgba(14,165,233,.06);
+  --accent-border:  rgba(14,165,233,.28);
+
+  /* Surfaces */
+  --bg:             #f1f5f9;
+  --bg-mid:         #e8eef6;
+  --surface:        #ffffff;
+  --surface-raised: #f8fafc;
+  --surface-top:    rgba(255,255,255,.97);
+
+  /* Borders */
+  --border:         #e2e8f0;
+  --border-hover:   #cbd5e1;
+  --border-card:    #e2e8f0;
+
+  /* Text */
+  --text-main:   #334155;
+  --text-h:      #0f172a;
+  --text-muted:  #64748b;
+  --text-subtle: #94a3b8;
+
+  /* Card Status Colors */
+  --status-blue:      rgba(59,130,246,.07);
+  --status-blue-b:    rgba(59,130,246,.22);
+  --status-blue-i:    #3b82f6;
+
+  --status-purple:    rgba(139,92,246,.07);
+  --status-purple-b:  rgba(139,92,246,.22);
+  --status-purple-i:  #8b5cf6;
+
+  --status-amber:     rgba(245,158,11,.07);
+  --status-amber-b:   rgba(245,158,11,.25);
+  --status-amber-i:   #f59e0b;
+
+  --status-green:     rgba(16,185,129,.07);
+  --status-green-b:   rgba(16,185,129,.25);
+  --status-green-i:   #10b981;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 4px rgba(15,23,42,.06);
+  --shadow-md:  0 4px 16px rgba(15,23,42,.08);
+  --shadow-lg:  0 12px 36px rgba(15,23,42,.11);
+  --glow-sky:   0 0 16px rgba(14,165,233,.15);
 }
 
-/* --------------------------------------------------------------
-   2️⃣  GLOBAL RESET
--------------------------------------------------------------- */
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
-
+/* ==============================================================
+   GLOBAL RESET
+============================================================== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:15px; }
 html, body, #root { height:100%; }
 
 body {
-  background:linear-gradient(180deg,#f7fbff 0%,#eef5fb 100%);
-  color:var(--text-main);
-  overflow:hidden;               /* **no page scroll** */
+  font-family:'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 0%,  rgba(14,165,233,.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 0%,  rgba(99,102,241,.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(16,185,129,.04) 0%, transparent 55%);
+  color: var(--text-main);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* --------------------------------------------------------------
-   3️⃣  TOP FIXED HEADER (unchanged – 101 px high)
--------------------------------------------------------------- */
+/* ==============================================================
+   ANIMATIONS
+============================================================== */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+@keyframes blink {
+  0%,100% { opacity:1; } 50% { opacity:0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==============================================================
+   TOP HEADER
+============================================================== */
 .top-header {
-  position:fixed; top:0; left:0; right:0;
-  height:101px; z-index:9999;
-  background:#fff; border-bottom:1px solid #e5e7eb;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 24px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 90px;
+  z-index: 9999;
+  background: var(--surface-top);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  box-shadow: var(--shadow-sm);
 }
-.top-left { display:flex; align-items:center; gap:18px; }
-.top-logo { height:100px; width:170px; object-fit:contain; }
+
+.top-left  { display:flex; align-items:center; gap:16px; }
+.top-logo  { height:82px; width:auto; object-fit:contain; }
+
 .top-center { flex:1; text-align:center; }
-.top-center h2 { font-size:26px; font-weight:700; color:#172554; }
-.top-center p  { margin-top:4px; color:#64748b; font-size:14px; }
-.top-right { display:flex; align-items:center; gap:18px; }
-.time-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:8px 14px; text-align:center; }
-.time-box span { display:block; font-size:13px; color:#0f172a; }
-.profile { width:42px; height:42px; border-radius:50%; background:#0ea5a5; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; cursor:pointer; }
+.top-center h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-h);
+  letter-spacing: -.3px;
+}
+.top-center p {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: .3px;
+}
 
-/* --------------------------------------------------------------
-   4️⃣  DASHBOARD CONTAINER – fills the rest of the viewport
--------------------------------------------------------------- */
+.top-right { display:flex; align-items:center; gap:14px; }
+.time-box {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 14px;
+  text-align: center;
+}
+.time-box span {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-main);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.time-box span:first-child {
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 400;
+  margin-bottom: 1px;
+}
+
+/* Status badge in header */
+.header-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: all .3s;
+}
+.header-status-badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+  transition: background .3s;
+}
+.header-status-badge.running   { border-color: rgba(245,158,11,.4); color: #d97706; background: rgba(245,158,11,.08); }
+.header-status-badge.running   .dot { background: #f59e0b; animation: pulse-ring 1.2s infinite; }
+.header-status-badge.completed { border-color: rgba(16,185,129,.35); color: #059669; background: rgba(16,185,129,.08); }
+.header-status-badge.completed .dot { background: #10b981; }
+.header-status-badge.failed    { border-color: rgba(239,68,68,.35); color: #dc2626; background: rgba(239,68,68,.08); }
+.header-status-badge.failed    .dot { background: #ef4444; }
+
+/* ==============================================================
+   DASHBOARD CONTAINER
+============================================================== */
 .dashboard-container {
-  margin-top:103px;                     /* height of .top-header + 2px gap */
-  height:calc(100vh - 103px);
-  padding:0 20px 12px;
-  display:grid;
-  /* rows = status | upload+progress | run‑btn | console+output (flex) */
+  margin-top: 92px;
+  height: calc(100vh - 92px);
+  padding: 16px 24px 16px;
+  display: grid;
   grid-template-rows:
-        auto          /* status cards */
-        auto          /* upload / progress */
-        auto          /* run button */
-        minmax(0,1fr);/* console + output – takes the rest */
-  gap:12px;
-  overflow:hidden;
+    auto
+    auto
+    auto
+    minmax(0,1fr);
+  gap: 14px;
+  overflow: hidden;
 }
 
-/* --------------------------------------------------------------
-   5️⃣  STATUS GRID (4 cards)
--------------------------------------------------------------- */
+/* ==============================================================
+   STATUS GRID (4 cards)
+============================================================== */
 .status-grid {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
+
+/* base card */
 .status-card {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px 16px;               /* reduced padding */
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px;
-  transition:.3s;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  animation: fadeUp .5s ease both;
+}
+.status-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,.6) 0%, transparent 60%);
+  pointer-events: none;
 }
 .status-card:hover {
-  transform:translateY(-4px);
-  box-shadow:0 8px 20px rgba(14,229,211,.15);
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
 }
-.status-card p { color:var(--text-muted); font-size:11px; margin:0; }
-.status-card h2 { font-size:18px; margin:0; }
+
+/* staggered animation delay */
+.status-card:nth-child(1) { animation-delay:.05s; }
+.status-card:nth-child(2) { animation-delay:.10s; }
+.status-card:nth-child(3) { animation-delay:.15s; }
+.status-card:nth-child(4) { animation-delay:.20s; }
+
+.status-card p  { color:var(--text-muted); font-size:11px; font-weight:500; letter-spacing:.4px; text-transform:uppercase; margin:0; }
+.status-card h2 { font-size:17px; font-weight:700; color:var(--text-h); margin:4px 0 0; }
+
+/* card icons */
 .card-icon {
-  width:30px; height:30px;
-  background:var(--accent-soft);
-  border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  color:var(--accent); font-size:18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: transform .25s;
 }
+.status-card:hover .card-icon { transform: scale(1.1); }
 
-/* --------------------------------------------------------------
-   6️⃣  UPLOAD / PROGRESS ROW (two equal columns)
--------------------------------------------------------------- */
-.trio { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+/* per-card icon themes */
+.status-card:nth-child(1) .card-icon { background:var(--status-blue);   color:var(--status-blue-i);   border:1px solid var(--status-blue-b); }
+.status-card:nth-child(2) .card-icon { background:var(--status-purple); color:var(--status-purple-i); border:1px solid var(--status-purple-b); }
+.status-card:nth-child(3) .card-icon { background:var(--status-amber);  color:var(--status-amber-i);  border:1px solid var(--status-amber-b); }
+.status-card:nth-child(4) .card-icon { background:var(--status-green);  color:var(--status-green-i);  border:1px solid var(--status-green-b); }
+
+/* accent left border per card */
+.status-card:nth-child(1) { border-left: 3px solid var(--status-blue-i); }
+.status-card:nth-child(2) { border-left: 3px solid var(--status-purple-i); }
+.status-card:nth-child(3) { border-left: 3px solid var(--status-amber-i); }
+.status-card:nth-child(4) { border-left: 3px solid var(--status-green-i); }
+
+/* ==============================================================
+   UPLOAD / PROGRESS ROW
+============================================================== */
+.trio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
 .trio > div { display:flex; min-width:0; }
-.upload-panel,.progress-panel { flex:1; min-width:0; }
-.upload-panel > *, .progress-panel > * { width:100%; height:auto; max-height:130px; }
+.upload-panel, .progress-panel { flex:1; min-width:0; }
+.upload-panel > *, .progress-panel > * { width:100%; }
 
-/* --------------------------------------------------------------
-   7️⃣  RUN BUTTON (centered)
--------------------------------------------------------------- */
-.workflow-action {
-  display:flex; justify-content:center; align-items:center; margin-top:0;
-}
-.run-btn {
-  background:linear-gradient(90deg,#14b8a6,#0ea5a5);
-  color:#fff; border:none;
-  padding:10px 20px; border-radius:8px;
-  font-size:13px; font-weight:700; cursor:pointer;
-  transition:.3s;
-}
-.run-btn:hover { transform:translateY(-2px); box-shadow:0 6px 14px rgba(20,184,166,.3); }
-
-/* --------------------------------------------------------------
-   8️⃣  CONSOLE + OUTPUT GRID – fills remaining height
--------------------------------------------------------------- */
-.console-output-grid {
-  display:grid;
-  grid-template-columns:minmax(0,7fr) minmax(260px,3fr);
-  gap:12px;
-  height:100%; min-height:0;          /* critical for flex children */
-}
-
-/* panels stretch to fill their grid cell */
-.console-panel, .output-panel {
-  height:100%; display:flex; flex-direction:column; min-height:0;
-}
-
-/* cards become flex columns that fill the panel */
-.console-output-grid .console-card,
-.console-output-grid .output-card {
-  width:100%; height:100%;
-  display:flex; flex-direction:column; flex:1; min-height:0;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;                    /* inner scroll only */
-}
-
-/* --------------------------------------------------------------
-   9️⃣  CONSOLE CARD
--------------------------------------------------------------- */
-.console-header {
-  background:var(--surface-soft);
-  padding:12px 16px;
-  display:flex; align-items:center; gap:10px;
-  border-bottom:1px solid var(--border);
-}
-.console-header h3 { font-size:14px; font-weight:600; margin:0; }
-.red,.yellow,.green { width:10px; height:10px; border-radius:50%; }
-.red{background:#ef4444;} .yellow{background:#f59e0b;} .green{background:#22c55e;}
-
-.console-card pre {
-  flex:1; padding:14px; margin:0;
-  background:#0f172a; color:#a7f3d0;
-  font-family:Consolas,monospace; font-size:13px; line-height:1.6;
-  overflow:auto;                     /* scroll only log lines */
-}
-
-/* --------------------------------------------------------------
-   🔟  OUTPUT / GENERATED FILES CARD
--------------------------------------------------------------- */
-.output-header {
-  padding:12px 16px;
-  border-bottom:1px solid var(--border);
-  font-weight:600; font-size:14px;
-}
-.generated-files-list {
-  flex:1; overflow-y:auto; padding:16px 24px 24px;
-}
-.file-item {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:8px 10px;
-  border-radius:8px;
-  transition:background .2s;
-}
-.file-item:hover {
-  background:var(--accent-bg);
-}
-.file-item svg:first-child {
-  color:var(--accent);
-  font-size:16px;
-  flex-shrink:0;
-}
-.file-item span {
-  flex:1;
-  min-width:0;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size:13px;
-  color:var(--text-main);
-}
-.download-btn {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:32px;
-  height:32px;
-  border:none;
-  border-radius:6px;
-  background:transparent;
-  color:var(--accent);
-  cursor:pointer;
-  transition:background .2s, color .2s;
-  flex-shrink:0;
-}
-.download-btn:hover,
-.download-btn:focus {
-  background:var(--accent);
-  color:#fff;
-}
-.download-btn:hover svg,
-.download-btn:focus svg {
-  color:#fff;
-}
-.download-btn svg {
-  font-size:14px;
-}
-.empty { margin-top:20px; color:var(--text-muted); font-size:13px; }
-
-/* --------------------------------------------------------------
-   1️⃣1️⃣  PROGRESS CARD (used in progress panel)
--------------------------------------------------------------- */
-.progress-card {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px 16px;
-  display:flex; flex-direction:column; justify-content:center;
-  height:100%;
-}
-.progress-header { display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; }
-.progress { height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden; }
-.progress-fill { height:100%; background:linear-gradient(90deg,#14b8a6,#0ea5a5); transition:width .5s; }
-
-/* --------------------------------------------------------------
-   1️⃣2️⃣  RESPONSIVE – ≤768 px stacks everything
--------------------------------------------------------------- */
-@media (max-width:768px){
-  .status-grid { grid-template-columns:repeat(2,1fr); }
-  .trio { grid-template-columns:1fr; }
-  .console-output-grid { grid-template-columns:1fr; }
-  .workflow-action .run-btn { width:100%; max-width:280px; }
-}
-
-/* --------------------------------------------------------------
-   UPLOAD CARD OVERRIDES – keep content inside the compact card
--------------------------------------------------------------- */
+/* ==============================================================
+   FILE UPLOAD CARD
+============================================================== */
 .upload-card {
-  height: auto !important;
-  max-height: 130px;
-  overflow: hidden;
-  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 14px 18px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  transition: border-color .25s;
+  animation: fadeUp .5s .25s ease both;
   margin: 0;
-  justify-content: flex-start;
+  overflow: hidden;
 }
+
+.upload-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .upload-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1.5px dashed var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-bg);
+  cursor: pointer;
+  transition: all .25s ease;
   flex: 1;
   min-height: 0;
-  padding: 12px 10px;
 }
-.selected-file {
-  height: auto !important;
-  margin-top: 8px;
-  margin-bottom: 2px;
-  padding: 8px 10px;
-  flex-shrink: 0;
-  font-size: small;
+.upload-box:hover {
+  border-color: var(--accent);
+  background: rgba(14,165,233,.1);
+  box-shadow: var(--glow-sky);
 }
 
-/* --------------------------------------------------------------
-   1️⃣3️⃣  SMALL TWEAKS FOR VERY LARGE SCREENS
--------------------------------------------------------------- */
-@media (min-width:1900px) and (min-height:1000px){
-  .dashboard-container { padding:16px 24px; gap:16px; }
-  .status-card { padding:20px 24px; }
-  .progress-card { padding:16px 20px; }
-  .console-header,.output-header { padding:14px 20px; }
-  .console-card pre { padding:16px; font-size:14px; }
-  .generated-files-list { padding:14px 20px 20px; }
+.upload-icon {
+  font-size: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.upload-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.upload-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  height: auto;
+  border-radius: 8px;
+  background: rgba(14,165,233,.07);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-light);
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.selected-file svg { font-size:14px; color:var(--accent); flex-shrink:0; }
+.selected-file span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Drag-over state */
+.upload-box.drag-over {
+  border-color: var(--accent);
+  background: rgba(14,165,233,.13);
+  box-shadow: var(--glow-sky);
+}
+
+/* ==============================================================
+   PROGRESS CARD
+============================================================== */
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 130px;
+  gap: 10px;
+  animation: fadeUp .5s .3s ease both;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.progress-header h3 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.progress-header span {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.progress-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0ea5e9, #6366f1, #0ea5e9);
+  background-size: 200% auto;
+  border-radius: 999px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.progress-fill.animating {
+  animation: shimmer 1.5s linear infinite;
+}
+
+.progress-steps {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.progress-step-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ==============================================================
+   RUN BUTTON
+============================================================== */
+.workflow-action {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.run-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  color: #fff;
+  border: none;
+  padding: 11px 36px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .3px;
+  transition: transform .2s, box-shadow .2s, opacity .2s;
+  box-shadow: 0 4px 16px rgba(14,165,233,.25);
+}
+.run-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.run-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(14,165,233,.35);
+}
+.run-btn:hover:not(:disabled)::before { opacity:1; }
+.run-btn:active:not(:disabled) { transform: translateY(0); }
+.run-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.run-btn.running {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  box-shadow: 0 4px 16px rgba(245,158,11,.25);
+}
+
+/* ==============================================================
+   CONSOLE + OUTPUT GRID
+============================================================== */
+.console-output-grid {
+  display: grid;
+  grid-template-columns: minmax(0,7fr) minmax(260px,3fr);
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+.console-panel, .output-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ==============================================================
+   CONSOLE CARD  (intentionally dark – it's a terminal)
+============================================================== */
+.console-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  animation: fadeUp .5s .35s ease both;
+}
+
+.console-header {
+  background: #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #334155;
+  flex-shrink: 0;
+}
+.console-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  flex: 1;
+}
+/* mac dots */
+.red, .yellow, .green { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.red    { background:#ef4444; }
+.yellow { background:#f59e0b; }
+.green  { background:#22c55e; }
+
+/* cursor blink when running */
+.console-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: #22c55e;
+  vertical-align: middle;
+  border-radius: 1px;
+  animation: blink .8s step-end infinite;
+  margin-left: 2px;
+}
+
+.console-card pre {
+  flex: 1;
+  padding: 16px 18px;
+  margin: 0;
+  background: #0f172a;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* coloring of specific log patterns */
+.log-script  { color: #60a5fa; font-weight: 600; }
+.log-success { color: #34d399; }
+.log-error   { color: #f87171; }
+.log-waiting { color: #475569; font-style: italic; }
+
+/* ==============================================================
+   OUTPUT / GENERATED FILES CARD
+============================================================== */
+.output-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  animation: fadeUp .5s .4s ease both;
+}
+
+.output-card-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--surface-raised);
+}
+.output-card-header h4 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.output-file-count {
+  font-size: 11px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-light);
+  padding: 2px 9px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.generated-files-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.generated-files-list::-webkit-scrollbar { width:4px; }
+.generated-files-list::-webkit-scrollbar-track { background:transparent; }
+.generated-files-list::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  transition: background .2s, transform .15s;
+  cursor: default;
+}
+.file-item:hover {
+  background: var(--accent-bg);
+  transform: translateX(2px);
+}
+.file-item svg:first-child {
+  color: var(--accent);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.file-item.folder-item svg:first-child {
+  color: #f59e0b;
+}
+.file-item span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  color: var(--text-main);
+  font-weight: 450;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.download-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+  transform: scale(1.08);
+}
+.download-btn svg { font-size: 13px; }
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+}
+.empty-state svg {
+  font-size: 32px;
+  color: var(--text-subtle);
+  opacity: .6;
+}
+.empty-state p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.empty-state span {
+  font-size: 11px;
+  color: var(--text-subtle);
+}
+
+/* Scrollbar for console */
+.console-card pre::-webkit-scrollbar { width:4px; height:4px; }
+.console-card pre::-webkit-scrollbar-track { background:transparent; }
+.console-card pre::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:4px; }
+
+/* ==============================================================
+   RESPONSIVE
+============================================================== */
+@media (max-width: 900px) {
+  .status-grid { grid-template-columns: repeat(2,1fr); }
+  .top-center h2 { font-size: 16px; }
+}
+@media (max-width: 768px) {
+  .trio { grid-template-columns: 1fr; }
+  .console-output-grid { grid-template-columns: 1fr; }
+  .workflow-action .run-btn { width:100%; max-width:280px; }
+  .dashboard-container { padding: 12px 14px; }
+}
+
+/* ==============================================================
+   LARGE SCREEN TWEAKS
+============================================================== */
+@media (min-width: 1900px) {
+  .status-card { padding: 18px 22px; }
+  .status-card h2 { font-size: 20px; }
+  .card-icon { width:42px; height:42px; font-size:20px; }
 }
