@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         try {
             const jobId = randomUUID();
-            console.log(__dirname);
+            // console.log(__dirname);
             
             const workspaceRoot = path.join(__dirname, "../../temp", jobId);
             const inputDir = path.join(workspaceRoot, "input");
